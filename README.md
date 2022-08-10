@@ -186,9 +186,9 @@ public interface ExtraTimeService {
   ```javascript
   //DTO를 사용할 때 팩토리 메서드를 사용하여 Entity를 받게 구현한다면, 필요한 데이터가 추가되더라도 클라이언트의 변경을 줄일 수 있다.
   public class DTO {
-  public static ofEntity(Entity entity) {
-  ...
-  }
+    public static ofEntity(Entity entity) {
+      ...
+    }
   }
   ```
   
@@ -199,6 +199,6 @@ public interface ExtraTimeService {
   
   ```javascript
   public interface DateUtil {
-  long between(Date from, Date to);
+    long between(Date from, Date to);
   }
   ```
