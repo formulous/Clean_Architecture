@@ -19,7 +19,7 @@
 
 이를 통해 업무 로직이 세부 사항들에 영향을 받지 않게 할 수 있다.
 
-## What data crosses the boundaries
+## What Data Crosses the Boundaries
 
 DB 형식의 데이터 구조나 Framework 에 종속적인 데이터를 사용하게 되면, 저수준의 데이터 형식을 고수준에서 알아야 하기에 의존성 규칙을 위반하게 된다.
 
@@ -80,3 +80,9 @@ public class CreateRequest {
   }
 }
 ```
+
+이렇게 서로 다른 이유로 변경이 될 수 있는 상황에서는 DTO를 분리하는게 적절하다.
+
+## Entity가 DTO를 직접 참조하는 문제
+
+Entity를 생성할 때 Controller로 부터 생성된 Request(DTO) 객체를 이용하는 경우가 있다.
