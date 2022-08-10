@@ -86,3 +86,33 @@ public class CreateRequest {
 ## Entity가 DTO를 직접 참조하는 문제
 
 Entity를 생성할 때 Controller로 부터 생성된 Request(DTO) 객체를 이용하는 경우가 있다.
+
+```javascript
+public class Entity {
+  ...
+  public static Entity of(Request request) {
+    ...
+  }
+}
+```
+
+위의 코드와 같이 Entity가 직접 DTO를 참조하게 된다면 DTO의 변경에 의해 Entity도 변경될 수 있다.
+이럴 때는 Entity를 생성하는 UseCase 계층에서 DTO의 데이터를 꺼내서 Entity를 생성하는 것이 DTO의 변경에 의해 Entity가 변경할 가능성을 낮출 수 있다.
+
+## Crossing Boundaries
+
+제어의 흐름은 내부에서 외부로 향할 수 있지만 소스코드의 의존성은 이렇게 될 경우 의존성 규칙을 위반하게 되므로, 의존성 역전의 원칙을 이용하여 해결해야 한다.
+-> 고수준 정책은 저수준 정책에 의존해서는 안된다.
+
+간단한 예시로 일반적으로 조회 요청이 일어나면 이를 처리하기 위한 제어의 흐름과 소스코드의 의존성은 아래와 같다.
+
+![image](https://user-images.githubusercontent.com/88424067/183795630-752509b3-1051-40b5-8f62-e08ae5e881b4.png)
+
+위와 같이 소스코드 의존성을 가지게 된다면 Service가 구체적인 RDMBS를 구현한 구현체를 직접 참조하게 되는데 이는 의존성 규칙을 위반하게 된다.
+이러한 문제의 가장 간단한 해결책은 DIP(의존성 역전의 원칙)을 적용하는 것이다.
+
+![image](https://user-images.githubusercontent.com/88424067/183795754-96d33289-ca16-4a6c-8ead-e65f4a70032b.png)
+
+추상화된 Repository 인터페이스를 두어서 Service가 이를 참조하고, 구체적인 RDRepository가 이러한 인터페이스를 구현하게 된다면 소스코드의 의존성을 역전시킬 수 있다.
+이렇게 DIP를 통해 Service는 DB의 구체적인 세부사항을 몰라도 되고, DB의 변경에도 영향을 받지 않게 된다.
+
