@@ -130,8 +130,75 @@ public class Entity {
 
 ![image](https://user-images.githubusercontent.com/88424067/183800187-eabefe8f-3671-4705-8fd1-724340eeecc8.png)
 
+여기서 배달료의 정보를 얻기 위해서는 DistanceFee와 RegionFee를 의존성 주입을 받아 사용해야 하는데, 사실 클라이언트 입장에서는 이런 구체적인 정보를 모르고 사용하는 것이 좋다.
+이럴 때 Facade를 제공하여 해결할 수 있다.
 
+![image](https://user-images.githubusercontent.com/88424067/183817601-27174104-5390-4721-af6b-cbb497ae6e23.png)'
 
+Facade를 제공하면 클라이언트는 배달료 정보를 얻기 위해 Facade 인터페이스에만 의존하면 된다.
 
+## 인터페이스 선언 시 주의할 점
 
+인터페이스를 분리하여 구체적인 세부사항을 분리 시킬 수 있었지만, 인터페이스를 선언할 때도 주의할 점이 몇가지가 존재한다.
 
+### 1. 인터페이스 분리
+
+인터페이스를 작성할 때는 클라이언트가 필요로 하는 메서드를 기반으로 분리되어야 한다.
+인터페이스를 구현체 클래스에 의존하여 작성하면 클라이언트가 필요하지 않은 메서드까지 노출되기 때문이다.
+
+예를 들어 특정 도메인 객체가 배달료, 배달팁, 배달시간의 할증에 괸한 정보를 가지고 있다고 하면 클라이언트가 사용할 인터페이스를 다음과 같이 구현체에 의존하여 작성했었다.
+
+```javascript
+public interface ExtraService {
+  long calculateExtraDeliveryFee(...);
+  long calculateExtraDeliveryTip(...);
+  long calculateExtraDeliveryTime(...);
+}
+```
+
+위의 코드에서 각각의 메서드를 소비하는 클라이언트들은 모두 달랐지만 같은 인터페이스를 바라보았기 때문에 각각의 변경에 따라 영향을 받을 수 있는 클라이언트가 많아지게 되었다.
+이러한 변경의 영향을 줄이기 위해 아래 코드와 같이 각각의 클라이언트를 기반으로 인터페이스를 분리하게 됐다.
+
+```javascript
+public interface ExtraFeeService {
+  long calculateExtraDeliveryFee(...);
+}
+public interface ExtraTipService {
+  long calculateExtraDeliveryTip(...);
+}
+public interface ExtraTimeService {
+  long calculateExtraDeliveryTime(...);
+}
+```
+
+### 2. 인터페이스 명
+
+인터페이스를 생성할 때 메서드 명에 구현체 클래스를 나타내곤 하는데 이는 직접적인 의존성은 없다고 하지만 결국 클라이언트가 세부적 사항을 알게하기 때문에 인터페이스의 이름, 메서드 이름을 정할 때도 구체적인 클래스의 이름을 드러내지 않는 것이 중요하다 생각한다.
+
+### 3. 인터페이스 메서드 파라미터
+
+인터페이스의 파라미터를 넘기는데에는 Entity, DTO, 필요한 데이터를 각각 넘기는 3가지 방법이 고려될 수 있다.
+
+1. Entity, DTO를 전달하는 방법
+  일반적으로 인터페이스를 사용하면 Entity 자체를 넘기거나 DTO를 파라미터로 사용한다.
+  이러한 이유는 업무 로직의 세부사항은 언제든지 변경될 수 있기 때문이다. Entity나 DTO를 사용하면 이러한 변경이 클라이언트에 영향을 미치는 것을 최소화할 수 있다.
+  
+  ```javascript
+  //DTO를 사용할 때 팩토리 메서드를 사용하여 Entity를 받게 구현한다면, 필요한 데이터가 추가되더라도 클라이언트의 변경을 줄일 수 있다.
+  public class DTO {
+  public static ofEntity(Entity entity) {
+  ...
+  }
+  }
+  ```
+  
+  보통 Entity보다 DTO를 사용하는 경우는 인터페이스가 특정 도메인에 종속되는 것이 아니라 범용적일 때 사용하고 있다.
+
+2. 필요한 데이터를 각각 넘기는 방법
+  모든 인터페이스에 Entity나 DTO를 넘기는 것은 과할 수 있다. 본인이 생각하기에 불변에 가까운 유틸성 인터페이스는 필요한 인자를 파라미터로 받으면 오히려 명확할 수 있다.
+  
+  ```javascript
+  public interface DateUtil {
+  long between(Date from, Date to);
+  }
+  ```
